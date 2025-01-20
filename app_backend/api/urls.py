@@ -15,5 +15,8 @@ urlpatterns = format_suffix_patterns([
         name='user-list'),
     path('users/<int:pk>/',
         views.UserDetail.as_view(),
-        name='user-detail')
+        name='user-detail'),
+    path('registration/',
+        views.UserRegistration.as_view(),
+        name='user-registration'),
 ])

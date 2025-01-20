@@ -12,3 +12,9 @@ export interface Boulder {
     consensus_grade?: number | null | undefined;
     ascentionist_count: number;
 }
+
+export interface User {
+    username: String;
+    email: String;
+    password: String;
+}

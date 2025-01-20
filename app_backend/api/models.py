@@ -10,8 +10,6 @@ from django.dispatch import receiver
 # User Model for authentication only.
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    birthday = models.DateField(null=True)
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'birthday']
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')

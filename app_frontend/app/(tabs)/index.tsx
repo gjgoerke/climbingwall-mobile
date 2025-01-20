@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import BoulderList from "@/components/BoulderList"
 import { Boulder } from "@/types/models"
 const getBoardsFromApi = () => {
