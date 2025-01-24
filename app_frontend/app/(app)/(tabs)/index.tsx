@@ -1,20 +1,6 @@
 import { View } from "react-native";
 import BoulderList from "@/components/BoulderList"
 import { Boulder } from "@/types/models"
-const getBoardsFromApi = () => {
-  return fetch('https://reactnative.dev/movies.json')
-    .then(response => response.json())
-    .then(json => {
-      return json.movies;
-    })
-    .catch(error => {
-      console.error(error);
-    });
-};
-
-const getBouldersFromApi = () => {
-
-}
 
 const mockBoulders: Boulder[] = [
   {

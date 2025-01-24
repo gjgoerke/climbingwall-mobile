@@ -27,6 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True  # Only for development!
 CORS_ALLOWED_ORIGINS = [

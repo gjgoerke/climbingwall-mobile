@@ -22,9 +22,23 @@ const Register = () => {
 return(
         <View style={styles.container}>
             <View style={styles.inputContainer}>
-                <TextInput onChangeText={(text: string) => {setUsername(text);}} value = {username} placeholder='username'/>
-                <TextInput onChangeText={(text: string) => {setEmail(text);}} value = {email} placeholder='email'/>
-                <TextInput onChangeText={(text: string) => {setPassword(text);}} value = {password} placeholder='password' secureTextEntry={true}/>
+                <TextInput 
+                    onChangeText={(text: string) => {setUsername(text);}}
+                    value = {username} 
+                    placeholder='username'
+                    autoCapitalize='none'/>
+                <TextInput 
+                    onChangeText={(text: string) => {setEmail(text);}} 
+                    value = {email} 
+                    placeholder='email'
+                    autoCapitalize='none'
+                    />
+                <TextInput 
+                    onChangeText={(text: string) => {setPassword(text);}} 
+                    value = {password} 
+                    placeholder='password' 
+                    secureTextEntry={true}
+                    autoCapitalize='none'/>
             </View>
             <View style={styles.buttons}>
                 <Button onPress={register} mode='outlined'>Submit</Button>
