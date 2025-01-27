@@ -1,6 +1,8 @@
 import { View } from "react-native";
+import {useState, useEffect } from 'react';
 import BoulderList from "@/components/BoulderList"
 import { Boulder } from "@/types/models"
+import api from "@/services/api";
 
 const mockBoulders: Boulder[] = [
   {
@@ -45,11 +47,28 @@ const mockBoulders: Boulder[] = [
     ascentionist_count: 69420
   }
 ];
+
+  
+
+
 export default function Index() {
+  const [boulderList, setBoulderlist] = useState<Boulder[]>([]);
+
+  useEffect(() => {
+    async function fetchBoulders() {
+      try {
+        const response = await api.get('/boulders');
+        setBoulderlist(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchBoulders();
+  }, []);
 
   return (
     <View style={{flex: 1,}}>
-      <BoulderList boulders={mockBoulders}/>
+      <BoulderList boulders={boulderList}/>
     </View>
   );
 }

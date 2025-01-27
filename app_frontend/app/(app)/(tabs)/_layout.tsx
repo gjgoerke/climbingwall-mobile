@@ -29,14 +29,24 @@ export default function TabLayout() {
                 }} 
             />
             <Tabs.Screen
-                name="board"
+                name="(boards)"
                 options={{
-                title: 'Wall',
+                title: 'Boards',
+                headerShown: false,
                 tabBarIcon: ({ color, focused }) => (
                     <Ionicons name={focused ? 'cube' : 'cube-outline'} color={color} size={24}/>
                 ),
                 }}
             />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: 'Profile',
+                    headerTitle: 'Profile',
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} color={color} size={24}/>
+                    ),
+                }}/>
         </Tabs>
     );
 }

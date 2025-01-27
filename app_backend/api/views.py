@@ -1,11 +1,16 @@
 from django.shortcuts import render
 from .models import Boulder, User, Board, Ascent
-from .serializers import BoulderSerializer, UserSerializer, UserRegistrationSerializer
+from .serializers import BoulderSerializer, UserSerializer, UserRegistrationSerializer, BoardSerializer
 from rest_framework import generics, permissions, serializers, renderers, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Count
 
+class BoardList(generics.ListCreateAPIView):
+    serializer_class = BoardSerializer
+
+    def get_queryset(self):
+        return Board.objects.all()
 
 class BoulderList(generics.ListCreateAPIView):
     serializer_class = BoulderSerializer
@@ -14,7 +19,7 @@ class BoulderList(generics.ListCreateAPIView):
     def get_queryset(self):
         return Boulder.objects.annotate(
             ascentionist_count=Count('ascents__user', distinct=True)
-        )
+        ).select_related('setter', 'first_ascentionist', 'board')
 
     def perform_create(self, serializer):
         serializer.save()

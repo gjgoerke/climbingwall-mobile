@@ -1,9 +1,9 @@
 import React from 'react';
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { Button } from 'react-native-paper';
 import { useAuth } from '@/context/AuthContext';
 
-export default function Wall3d() {
+export default function Profile() {
   const {onLogout} = useAuth();
     return (
       <View style={{

@@ -14,10 +14,12 @@ const api = axios.create({
 //Add auth token to api requests
 api.interceptors.request.use(
     async (config) => {
-        const token = await SecureStore.getItemAsync(TOKEN_KEY);
-        if (token) {
-            
-            config.headers.Authorization = `Bearer ${JSON.parse(token).access}`;
+        const tokens = await SecureStore.getItemAsync(TOKEN_KEY);
+        if (tokens) {
+            config.headers.set('Authorization', `Bearer ${JSON.parse(tokens).access}`);
+            console.log('Request headers:', config.headers);
+        } else {
+            console.log('No token found in storage');
         }
         return config;
     },
@@ -25,5 +27,4 @@ api.interceptors.request.use(
         return Promise.reject(error);
     }
 );
-
 export default api;

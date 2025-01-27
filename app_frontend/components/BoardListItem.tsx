@@ -1,18 +1,17 @@
 import React from 'react';
 import { List } from 'react-native-paper';
 
-interface BoulderListItemProps {
+interface BoardListItemProps {
     name: string;
-    grade: number | null | undefined;  // matches consensus_grade from Boulder interface
-    rating: 1 | 2 | 3 | 4 | 5;
-    ascentionist_count: number;
+    city: string;
+    angle: number;
 }
 
-const BoulderListItem = ({name, grade, rating, ascentionist_count} : BoulderListItemProps) => (
+const BoardListItem = ({name, city, angle} : BoardListItemProps) => (
     <List.Item
     title={name}
-    description={` V${grade || 'project'} - ${rating} stars \n ${ascentionist_count} ascents `}
+    description={`${city} - ${angle}°`}
     />
 );
 
-export default BoulderListItem;
+export default BoardListItem;

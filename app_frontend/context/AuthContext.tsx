@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from 'expo-secure-store';
 import api, { TOKEN_KEY } from '@/services/api';
 import { User } from "@/types/models";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext<authProps>({});
 
@@ -28,22 +29,6 @@ export const useAuth = () => {
     return useContext(AuthContext);
 }
 
-export const refreshToken = async () => {
-    try {
-        const oldToken = await SecureStore.getItemAsync(TOKEN_KEY);
-        if (oldToken) {
-            const response = await api.post('/token/refresh/',{
-                refresh: JSON.parse(oldToken).refresh
-            });
-            await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(response.data));
-            return response.data;
-        } else {
-            throw new Error('No oldToken in Storage.');
-        }
-    } catch (error: any) {
-        console.log(error.message)
-    }
-}
 
 export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -55,16 +40,67 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
             authenticated: false
     });
 
+    const refreshToken = async (token: authToken) => {
+        try {
+            const response = await api.post('/token/refresh/', {
+                refresh: token.refresh
+            });
+            return {
+                refresh: token.refresh,
+                access: response.data.access
+            };
+        } catch (error) {
+            console.error('Token refresh error:', error);
+            return null;
+        }
+    }
+
+    const isTokenExpired = (token: authToken) => {
+        try {
+            const decoded = jwtDecode(token.access);
+            if (decoded.exp){
+                return (decoded.exp * 1000 < Date.now());
+            }
+        } catch {
+            return true;
+        }
+    }
+
     useEffect(() => {
         const loadToken = async () => {
             setIsLoading(true);
-            const token = await refreshToken();
-            if(token) {
-                api.defaults.headers.common['Authorization'] = `Bearer ${token.access}`;
-                setauthState({
-                    token: token,
-                    authenticated: true
-                });
+            const token_string = await SecureStore.getItemAsync(TOKEN_KEY);
+            if(token_string) {
+                const token = JSON.parse(token_string);
+                console.log('loading token: ', token);
+                if (!isTokenExpired(token)) {
+                    console.log('token not expired');
+                    // Token not expired, login
+                    setauthState({
+                        token: token,
+                        authenticated: true
+                    });
+                } else {
+                    console.log('token expired');
+                    // Try to get a refresh token
+                    const newToken = await refreshToken(token);
+                    if (newToken) {
+                        console.log('token refresh successful');
+                        // Refresh successful, login
+                        setauthState({
+                            token: newToken,
+                            authenticated: true
+                        });
+                    } else {
+                        console.log('token refresh failed');
+                        // Refresh failed, clear storage and state
+                        await SecureStore.deleteItemAsync(TOKEN_KEY);
+                        setauthState({
+                            token: null,
+                            authenticated: false
+                        });
+                    }
+                }
             }
             setIsLoading(false);
         }
@@ -79,7 +115,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
                 password: user.password,
             });
             const token = response.data;
-            api.defaults.headers.common['Authorization'] = `Bearer ${token.access}`;
             await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(token));
             setauthState({
                 token: {
@@ -107,7 +142,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
         try {
             setIsLoading(true);
             const token = (await api.post('/registration/', user)).data;
-            api.defaults.headers.common['Authorization'] = `Bearer ${token.access}`;
             await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(token));
             setauthState({
                 token: token,
@@ -125,7 +159,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
     
     const logout = async () => {
         try {
-            delete api.defaults.headers.common['Authorization'];
             await SecureStore.deleteItemAsync(TOKEN_KEY);
             setauthState({
                 token: null,

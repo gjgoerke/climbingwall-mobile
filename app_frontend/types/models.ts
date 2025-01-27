@@ -18,3 +18,14 @@ export interface User {
     email: String;
     password: String;
 }
+
+export interface Board {
+    name: string;
+    description: string;
+    owner: string;
+    angle: number;
+    city: string;
+    latitude: number | null;
+    longitude: number | null;
+    led_quantity: number;
+}

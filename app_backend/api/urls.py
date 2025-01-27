@@ -4,6 +4,10 @@ from api import views
 
 # API endpoints
 urlpatterns = format_suffix_patterns([
+    path('boards/',
+        views.BoardList.as_view(),
+        name='board-list'
+    ),
     path('boulders/',
         views.BoulderList.as_view(),
         name='boulder-list'),
