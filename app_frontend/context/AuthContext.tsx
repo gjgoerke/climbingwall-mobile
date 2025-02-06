@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
         try {
             const response = await api.post('/token/refresh/', {
                 refresh: token.refresh
-            });
+            });            
             return {
                 refresh: token.refresh,
                 access: response.data.access
@@ -86,19 +86,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
                     const newToken = await refreshToken(token);
                     if (newToken) {
                         console.log('token refresh successful');
-                        // Refresh successful, login
+                        // Refresh successful: set request header, and login
+                        api.interceptors.request.use(async (config) => {
+                            config.headers.set('Authorization', `Bearer ${newToken.access}`);
+                            return config;
+                        });
                         setauthState({
                             token: newToken,
                             authenticated: true
                         });
                     } else {
                         console.log('token refresh failed');
-                        // Refresh failed, clear storage and state
+                        // Refresh failed, clear storage, state, and request header.
                         await SecureStore.deleteItemAsync(TOKEN_KEY);
+                        api.interceptors.request.use(async (config) => {
+                            config.headers.delete('Authorization');
+                            return config;
+                        });
                         setauthState({
                             token: null,
                             authenticated: false
                         });
+                        router.replace('/login')
                     }
                 }
             }
