@@ -31,13 +31,12 @@ export default function NewBoard() {
                     description,
                     angle,
                     city,
-                    ledQuantity
+                    ledQuantity,
                 }
             }) :
             () =>{}
         }
     }
-
     return(
         <>
             <Appbar.Header>

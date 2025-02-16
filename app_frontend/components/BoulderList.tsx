@@ -6,7 +6,6 @@ import { Boulder } from '@/types/models';
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingTop: 22,
     },
 });
 

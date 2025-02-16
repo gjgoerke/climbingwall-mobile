@@ -7,7 +7,7 @@ import { Appbar } from 'react-native-paper';
 import BoardList from '@/components/BoardList';
 import { Board } from '@/types/models';
 
-export default function Boards() {
+export default function Index() {
   const [boardList, setBoardlist] = useState<Board[]>([]);
 
   useEffect(() => {
@@ -22,7 +22,8 @@ export default function Boards() {
             status: error.response?.status,
             data: error.response?.data,
             headers: error.response?.headers
-          });
+          })
+        if (error.response?.status == 401){router.replace('/login')};
         } else {
           console.error('Unexpected error: ', error);
         }

@@ -89,6 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
                         // Refresh successful: set request header, and login
                         api.interceptors.request.use(async (config) => {
                             config.headers.set('Authorization', `Bearer ${newToken.access}`);
+                            console.log('api header set to: ',newToken.access);
                             return config;
                         });
                         setauthState({
@@ -125,6 +126,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
             });
             const token = response.data;
             await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(token));
+            api.interceptors.request.use(async (config) => {
+                config.headers.set('Authorization', `Bearer ${token.access}`);
+                return config;
+            });
             setauthState({
                 token: {
                     refresh: token.refresh,
@@ -152,6 +157,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
             setIsLoading(true);
             const token = (await api.post('/registration/', user)).data;
             await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(token));
+            api.interceptors.request.use(async (config) => {
+                config.headers.set('Authorization', `Bearer ${token.access}`);
+                return config;
+            });
             setauthState({
                 token: token,
                 authenticated: true

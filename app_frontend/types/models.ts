@@ -20,6 +20,7 @@ export interface User {
 }
 
 export interface Board {
+    id: number;
     name: string;
     description: string;
     owner: string;
@@ -28,4 +29,15 @@ export interface Board {
     latitude: number | null;
     longitude: number | null;
     led_quantity: number;
+    image: string;
+}
+
+export interface LedConfig {
+    board: number;
+    hold_data: {
+        led_number: number;
+        relative_x: number;
+        relative_y: number;
+        radius: number;
+    }[];
 }

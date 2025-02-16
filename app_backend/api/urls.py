@@ -6,8 +6,16 @@ from api import views
 urlpatterns = format_suffix_patterns([
     path('boards/',
         views.BoardList.as_view(),
-        name='board-list'
-    ),
+        name='board-list'),
+    path('boards/create/',
+        views.BoardCreate.as_view(),
+        name='board-create'),
+    path('boards/<int:pk>/',
+        views.BoardDetail.as_view(),
+        name='board-detail'),
+    path('boards/<int:board_id>/led-config/',
+        views.LedConfigView.as_view(),
+        name='led-config'),
     path('boulders/',
         views.BoulderList.as_view(),
         name='boulder-list'),

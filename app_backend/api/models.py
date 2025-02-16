@@ -19,16 +19,18 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f'{self.user.username}\'s Profile'
+
     
 # ---- Boards ----
 class Board(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     owner = models.ForeignKey(User, on_delete=models.PROTECT, related_name='owned_boards')
+    image = models.ImageField(upload_to='board_images/', null=True)
 
     #Location
     city = models.CharField(max_length=255)
-    address = models.CharField(max_length=255)
+    address = models.CharField(max_length=255, null=True)
     latitude = models.DecimalField(
         max_digits=9, 
         decimal_places=6,
@@ -50,7 +52,15 @@ class Board(models.Model):
     def __str__(self):
         return f"{self.name} ({self.city})"
     
+class LedConfig(models.Model):
+    board = models.OneToOneField(Board, on_delete=models.CASCADE, related_name='led_config')
+    hold_data = models.JSONField()  # Stores array of hold positions and properties
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"LED Configuration for {self.board.name}"
+    
 # ---- Climbs ----
 class BaseClimb(models.Model):
     RATING_CHOICES = [

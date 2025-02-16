@@ -1,5 +1,7 @@
 import { View } from "react-native";
+import { router } from "expo-router";
 import {useState, useEffect } from 'react';
+import { Appbar } from "react-native-paper";
 import BoulderList from "@/components/BoulderList"
 import { Boulder } from "@/types/models"
 import api from "@/services/api";
@@ -68,6 +70,12 @@ export default function Index() {
 
   return (
     <View style={{flex: 1,}}>
+      <Appbar.Header>
+          <Appbar.Content title=""/>
+          <Appbar.Action icon="magnify" onPress={() => {}} />
+          <Appbar.Action icon="plus" onPress={() => {}} />
+          <Appbar.Action icon="dots-vertical"/>
+      </Appbar.Header>
       <BoulderList boulders={boulderList}/>
     </View>
   );

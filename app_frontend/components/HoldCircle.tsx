@@ -1,29 +1,21 @@
-import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useSharedValue, useAnimatedProps, SharedValue} from 'react-native-reanimated';
-import Animated from 'react-native-reanimated';
-import { Circle } from '@shopify/react-native-skia';
-import type { Dispatch, SetStateAction } from 'react';
+import { SharedValue} from 'react-native-reanimated';
+import { Circle, Paint, BlurMask } from '@shopify/react-native-skia';
+import type { Hold } from '@/app/(app)/(tabs)/(boards)/board_configuration';
 
 interface HoldCircleProps {
-    x: SharedValue<number>;
-    y: SharedValue<number>;
-    r: SharedValue<number>;
+    hold: Hold;
     isActive: boolean;
-    index: number;
-    changeSelectedLed: Dispatch<SetStateAction<number>>;
 }
 
-// Create animated component from the forwarded ref version
-
-export default function HoldCircle({x, y, r, isActive, index, changeSelectedLed} : HoldCircleProps) {
+export default function HoldCircle({hold, isActive} : HoldCircleProps) {
 
     return (
         <Circle 
-            cx={x}
-            cy= {y}
-            r={r}
-            // stroke={isActive ? "purple" : "black"}
-            // strokeWidth={2}
-        />
+            cx={hold.x}
+            cy={hold.y}
+            r={hold.r}
+            color={'rgba(0,0,0,0)'}>
+            <Paint color={isActive ? '#c705f7' : "#adbce6"} style="stroke" strokeWidth={2} />
+        </Circle>
     );
 }

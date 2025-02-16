@@ -1,42 +1,147 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState, useRef } from 'react';
 import { Appbar, Button } from "react-native-paper";
-import { View, StyleSheet, LayoutChangeEvent, Platform} from "react-native";
+import { View, StyleSheet, LayoutChangeEvent } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
-
-import { Canvas, Circle, Rect, Mask, Group, Image, useImage } from "@shopify/react-native-skia";
+import { Canvas, Image, useImage } from "@shopify/react-native-skia";
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { runOnJS, SharedValue, useSharedValue } from 'react-native-reanimated';
-import HoldCircle from "@/components/HoldCircle";
+import { SharedValue, useSharedValue } from 'react-native-reanimated';
+
 import LedConfig from "@/components/LedConfig";
-import CircleGestureHandler from "@/components/CircleGestureHandler";
+import api from "@/services/api";
+import AnimatedCircleGestureHandlers from "@/components/AnimatedGestureHandlers";
+import AnimatedHoldCircles from "@/components/AnimatedHoldCircles";
+import { screenCoordsToImg } from "@/services/image_drawing";
 
-
-type Hold = {
-    enabled: true;
+// x,y values are absolute screen coordiinates.
+export type Hold = {
     x: SharedValue<number>;
     y: SharedValue<number>;
     r: SharedValue<number>;
-} | {
-    enabled:false
+}
+
+interface ImageUpload {
+    uri: string;
+    type: string;
+    name: string;
 }
 
 export default function BoardConfiguration() {
     const params = useLocalSearchParams();
     const [image, setImage] = useState<string|null>(null);
+    const [imageB64, setImageB64] = useState<string|null>(null);
     const skiaImage = useImage(image);
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+    const canvasHeightRef = useRef(0);
+    const canvasWidthRef = useRef(0);
     const ledCount = Number(params.ledQuantity);
-    // Radius of each HoldCircle, needs to be its own SharedValue instance.
-    const radii = Array(ledCount).fill(0).map(() => useSharedValue<number>(20));  
-    const positions = Array(ledCount).fill(0).map(() => ({
+    const [holds, setHolds] = useState<Hold[]>(Array(ledCount).fill(0).map(() => ({
         x: useSharedValue(0),
-        y: useSharedValue(0)
-    }));
-    const [holds, setHolds] = useState<Hold[]>(Array(ledCount).fill({enabled: false}));
+        y: useSharedValue(0),
+        r: useSharedValue(20),
+    })));
+    const [enabledHolds, setEnabledHolds] = useState<boolean[]>(Array(ledCount).fill(false));
     const scales = Array(ledCount).fill(0).map(() => useSharedValue<number>(1));
     const savedScales = Array(ledCount).fill(0).map(() => useSharedValue<number>(1));
     const [selectedLed, setSelectedLed] = useState<number>(1);
+
+    // Need the following:
+        // Loading spinner while submitting
+        // Post basic board data to the board endpoint (1 function)
+        // Post LedConfig data if applicable
+
+    const createBoard = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('name', params.name as string);
+            formData.append('description', params.description as string || "");
+            formData.append('angle', params.angle as string);
+            formData.append('city', params.city as string);
+            formData.append('led_quantity', params.ledQuantity as string);
+            
+            if (params.latitude) formData.append('latitude', params.latitude as string);
+            if (params.longitude) formData.append('longitude', params.longitude as string);
+
+            if (image) {
+                const imageUpload: ImageUpload = {
+                    uri:  image,
+                    type: 'image/jpeg',
+                    name: 'board_image.jpg'
+                };
+                formData.append('image', imageUpload as unknown as Blob);
+            }
+
+            console.log('FormData contents:', Object.fromEntries(formData as any));
+
+            const response = await api.post('/boards/create/', formData, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                },
+                transformRequest: (data) => data,
+            });
+            
+            return response;
+        } catch(error) {
+            throw error;
+        }
+    }
+
+    const handleBoardCreate = async () => {
+        const createBoardResponse = await createBoard();
+        try {
+            console.log('createBoardResponse: ', createBoardResponse?.data);
+            const ledConfigData = holds.map((hold, index) => {
+                if(enabledHolds[index]) {
+                    const {img_x, img_y, img_r} = screenCoordsToImg(
+                        hold.x.value, 
+                        hold.y.value,
+                        canvasWidthRef.current,
+                        canvasHeightRef.current,
+                        skiaImage?.width() || 0,
+                        skiaImage?.height() || 0,
+                        hold.r.value
+                    )
+                    return {
+                        led_number: index + 1,
+                        relative_x: img_x,
+                        relative_y: img_y,
+                        radius: img_r
+                    }
+                }
+            }).filter((hold) => !!hold);
+            console.log('LED config data: ', ledConfigData);
+            const ledConfigResponse = await api.post(
+                '/boards/' + String(createBoardResponse?.data.id) + '/led-config/', {
+                    board: createBoardResponse.data.id,
+                    hold_data: ledConfigData
+                },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+            }});
+            if(ledConfigResponse.status === 201 || ledConfigResponse.status === 200) {
+                router.replace('/(tabs)/(boards)');
+            }
+            console.log('ledConfigResponse status: ', ledConfigResponse.status)
+            
+            return ledConfigResponse;
+        } catch (error) {
+            
+        }
+    }
+
+    const deleteHoldCircle = (index: number) => {
+        const newHoldArr = [...holds];
+        newHoldArr[index].x.value = 0;
+        newHoldArr[index].y.value = 0;
+        newHoldArr[index].r.value = 20;
+        setHolds(newHoldArr);
+        const newEnabledArr = [...enabledHolds];
+        newEnabledArr[index] = false;
+        setEnabledHolds(newEnabledArr);
+    }
 
     // Image handling
     const pickImage = async () => {
@@ -44,17 +149,23 @@ export default function BoardConfiguration() {
           mediaTypes: ['images'],
           allowsEditing: true,
           quality: 1,
+          base64: true
         });
         if (!result.canceled) {
             setImage(result.assets[0].uri);
+            setImageB64(result.assets[0].base64 || null);
         }
     }
 
-    const handleImageLayout = (event: LayoutChangeEvent) => {
+    const handleLayout = (event: LayoutChangeEvent) => {
         const { width, height } = event.nativeEvent.layout;
-        setImageDimensions({ width, height });
-    }
-
+        canvasWidthRef.current = width;
+        canvasHeightRef.current = height;
+        const imgAspect = skiaImage?.height() && skiaImage?.width() 
+        ? skiaImage.height() / skiaImage.width() 
+        : height / width;
+        setImageDimensions({ width, height: width * imgAspect });
+    } 
     // Buttons
     const leftOnPress = () => {
         if (selectedLed > 1) {
@@ -73,7 +184,7 @@ export default function BoardConfiguration() {
         .onBegin(()=> {})
         .onUpdate((e) => {
             scales[selectedLed - 1].value = savedScales[selectedLed - 1].value * e.scale;
-            radii[selectedLed - 1].value = 20 * scales[selectedLed - 1].value;
+            holds[selectedLed - 1].r.value = 20 * scales[selectedLed - 1].value;
         })
         .onEnd((_event, success) => {
             savedScales[selectedLed - 1].value = scales[selectedLed - 1].value;
@@ -84,38 +195,40 @@ export default function BoardConfiguration() {
     const tapGesture = Gesture.Tap()
             .onEnd((event) => {
                 console.log('tap!')
-                if(!holds[selectedLed - 1].enabled) {
-                    positions[selectedLed - 1].x.value = event.x;
-                    positions[selectedLed - 1].y.value = event.y;
+                if(!enabledHolds[selectedLed - 1]) {
                     console.log('tap: selected LED: ', selectedLed)
-                    const newHoldsArr = [...holds]
-                    newHoldsArr[selectedLed - 1] = {
-                        enabled: true, 
-                        x: positions[selectedLed - 1].x, 
-                        y: positions[selectedLed - 1].y, 
-                        r: radii[selectedLed - 1] 
-                    }
-                   setHolds(newHoldsArr);
-                }
-            }).runOnJS(true);
 
-            const gestures = Gesture.Exclusive(pinchGesture, tapGesture);
+                    const newHoldsArr = [...holds]
+                    newHoldsArr[selectedLed - 1].x.value = event.x;
+                    newHoldsArr[selectedLed - 1].y.value = event.y;
+                    setHolds(newHoldsArr);
+
+                    const newEnabledArr = [...enabledHolds];
+                    newEnabledArr[selectedLed - 1] = true;
+                    setEnabledHolds(newEnabledArr);
+                   
+                }
+            })
+            .runOnJS(true);
+
+    const gestures = Gesture.Exclusive(pinchGesture, tapGesture);
 
     return (
         <>
             <Appbar.Header>
                 <Appbar.BackAction onPress={() => {router.back();}} />
                 <Appbar.Content title="Configure LEDs"/>
+                {image && <Appbar.Action icon={'help-circle-outline'}/>}
             </Appbar.Header>
             {!image ? 
                 <Button onPress={pickImage} mode='outlined'>Choose a photo</Button>
             :
             <View style={{flex: 1}}>
                 <GestureHandlerRootView style={{flex: 1}}>
-                    <GestureDetector gesture={gestures}>
+                    <GestureDetector gesture={gestures} >
                         <Canvas 
                             style={styles.imageContainer}
-                            onLayout={handleImageLayout}>
+                            onLayout={handleLayout}>
                             {skiaImage && (
                                 <Image 
                                     image={skiaImage}
@@ -129,41 +242,31 @@ export default function BoardConfiguration() {
                                 />
                             )}
                             {imageDimensions.width > 0 && imageDimensions.height > 0 && (
-                                <Group>
-                                    {holds.filter((hold) => hold.enabled).map((hold, index) => (
-                                        <HoldCircle
-                                            key={index}
-                                            index={index}
-                                            x={hold.x}
-                                            y={hold.y}
-                                            r={radii[index]}
-                                            isActive={index == selectedLed - 1}
-                                            changeSelectedLed={setSelectedLed}
-                                        />
-                                    ))}
-                                </Group>
+                                <AnimatedHoldCircles holds={holds} enabledHolds={enabledHolds} selectedLed={selectedLed}/>
                             )}
                         </Canvas>
-                        </GestureDetector>
-                        {holds.filter((hold) => hold.enabled).map((hold, index) => (
-                                        <CircleGestureHandler
-                                            key={index}
-                                            index={index}
-                                            x={hold.x}
-                                            y={hold.y}
-                                            r={radii[index]}
-                                            isActive={index == selectedLed - 1}
-                                            changeSelectedLed={setSelectedLed}
-                                        />
-                                    ))}
+                    </GestureDetector>
+
+                    <AnimatedCircleGestureHandlers 
+                        holds={holds}
+                        enabledHolds={enabledHolds}
+                        selectedLed={selectedLed}
+                        setSelectedLed={setSelectedLed}
+                        canvasHeight={canvasHeightRef.current}
+                        canvasWidth={canvasWidthRef.current}
+                        deleteHoldCircle={deleteHoldCircle}
+                    />
                     
                 </GestureHandlerRootView>
                 <LedConfig 
-                imgWidth={imageDimensions.width} 
-                imgHeight = {imageDimensions.height}
-                ledIndex={selectedLed}
-                leftOnPress={leftOnPress}
-                rightOnPress={rightOnPress}/>
+                    ledIndex={selectedLed}
+                    ledCount={ledCount}
+                    leftOnPress={leftOnPress}
+                    rightOnPress={rightOnPress}
+                    handleSubmit={handleBoardCreate}
+                    canvasHeight={canvasHeightRef.current}
+                    canvasWidth={canvasWidthRef.current}
+                />
             </View>
             }
         </>
@@ -173,7 +276,7 @@ export default function BoardConfiguration() {
 const styles = StyleSheet.create({
     imageContainer: {
         flex: 1,
-        backgroundColor: 'black',
-        ...StyleSheet.absoluteFillObject,
+        width: '100%',
+        height: '100%'
     }
 })

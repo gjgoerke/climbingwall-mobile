@@ -23,6 +23,7 @@ const BoardList = ({ boards } : BoardListProps) => {
                         name={item.name}
                         angle={item.angle}
                         city={item.city}
+                        id={item.id}
                     />
                  )}
             />

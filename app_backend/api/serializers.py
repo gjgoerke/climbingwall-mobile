@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Boulder, User, Board, Ascent
+from .models import Boulder, User, Board, Ascent, LedConfig
 
 
         
@@ -36,4 +36,10 @@ class BoardSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     class Meta:
         model = Board
-        fields = ['name', 'description', 'owner', 'angle', 'city', 'latitude', 'longitude', 'led_quantity']
+        fields = ['name', 'id', 'description', 'owner', 'image', 'angle', 'city', 'latitude', 'longitude', 'led_quantity']
+
+
+class LedConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LedConfig
+        fields = ['board', 'hold_data']
