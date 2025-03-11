@@ -1,3 +1,4 @@
+import React from "react";
 import { router } from "expo-router";
 import { View, StyleSheet, Text, ScrollView, Image} from "react-native";
 import { Appbar, Button, TextInput, Switch } from "react-native-paper";
@@ -40,7 +41,7 @@ export default function NewBoard() {
     return(
         <>
             <Appbar.Header>
-                <Appbar.BackAction onPress={() => {router.back();}} />
+                <Appbar.Action icon={'arrow-left'} onPress={() => {router.back();}}/>
                 <Appbar.Content title="New Board"/>
             </Appbar.Header>
             <ScrollView>

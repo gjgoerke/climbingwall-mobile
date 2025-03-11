@@ -1,3 +1,4 @@
+import React from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState, useRef } from 'react';
 import { Appbar, Button } from "react-native-paper";
@@ -216,7 +217,7 @@ export default function BoardConfiguration() {
     return (
         <>
             <Appbar.Header>
-                <Appbar.BackAction onPress={() => {router.back();}} />
+                <Appbar.Action icon={'arrow-left'} onPress={() => {router.back();}}/>
                 <Appbar.Content title="Configure LEDs"/>
                 {image && <Appbar.Action icon={'help-circle-outline'}/>}
             </Appbar.Header>

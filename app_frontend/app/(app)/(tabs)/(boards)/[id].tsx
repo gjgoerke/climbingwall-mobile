@@ -10,6 +10,7 @@ import { Appbar } from "react-native-paper";
 import api from "@/services/api";
 import { Board, LedConfig } from "@/types/models";
 import { imgCoordsToScreen } from "@/services/image_drawing";
+import { useBoard } from "@/context/BoardContext";
 
 const styles = StyleSheet.create({
     container: {
@@ -30,8 +31,10 @@ export default function BoardDetail() {
     const [boardData, setBoardData] = useState<Board>();
     const [ledConfigData, setLedConfigData] = useState<LedConfig>();
     const [imageDimensions, setImageDimensions] = useState({width: 0, height: 0});
+    const { selectBoard } = useBoard();
 
     useEffect(() => {
+        console.log('fetchBoard')
         async function fetchBoard() {
           try {
             const [boardResp, ledConfigResp] = await Promise.all([
@@ -55,6 +58,14 @@ export default function BoardDetail() {
         fetchBoard();
         }, []);
 
+        // Make the current board being viewed the active board via BoardContext.
+        useEffect(() => {
+            console.log('selectBoard')
+            if (boardData && ledConfigData) {
+                selectBoard(boardData, ledConfigData);
+            }
+        }, [boardData, ledConfigData, selectBoard])
+
         const handleLayout = (event: LayoutChangeEvent) => {
             const { width, height } = event.nativeEvent.layout;
             setImageDimensions({ width, height });
@@ -65,7 +76,7 @@ export default function BoardDetail() {
         return(
             <View style={styles.container}>
                 <Appbar.Header>
-                    <Appbar.BackAction onPress={() => {router.back();}} />
+                    <Appbar.Action icon={'arrow-left'} onPress={() => {router.back();}}/>
                     <Appbar.Content title={`${boardData?.name}`}/>
                 </Appbar.Header>
                 <Canvas style={styles.canvas} onLayout={handleLayout}>

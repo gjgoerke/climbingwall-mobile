@@ -63,13 +63,6 @@ class LedConfig(models.Model):
     
 # ---- Climbs ----
 class BaseClimb(models.Model):
-    RATING_CHOICES = [
-        (1, '1 Star'),
-        (2, '2 Stars'),
-        (3, '3 Stars'),
-        (4, '4 Stars'),
-        (5, '5 Stars'),
-    ]
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     date_set = models.DateTimeField(auto_now_add=True)
@@ -83,18 +76,12 @@ class BaseClimb(models.Model):
         null=True
     )
     draft = models.BooleanField(default=True)
-    rating = models.SmallIntegerField(
-        choices=RATING_CHOICES,
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(5)
-        ]
-    )
     class Meta:
         abstract = True
 
 class Boulder(BaseClimb):
     fa_grade = models.IntegerField(blank=True, null=True)
+    holds = models.JSONField()
 
     # Averages each individual users propsed grades then averages all the averaged grades and rounds.
     @property 
@@ -104,9 +91,24 @@ class Boulder(BaseClimb):
             .annotate(avg_grade =  Avg('proposed_grade'))\
             .aggregate(Avg('avg_grade'))
         return round(result['avg_grade__avg']) if result['avg_grade__avg'] is not None else None
+    
+    @property
+    def like_count(self):
+        return self.likes_from.count()
 
     def __str__(self):
         return f"{self.name} - Grade {self.consensus_grade or 'Unknown'}"
+    
+class LikedBoulder(models.Model):
+    boulder = models.ForeignKey(Boulder, on_delete=models.CASCADE, related_name='likes_from')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='liked_boulders')
+    date_liked = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'boulder')
+        verbose_name = 'Liked Boulder'
+        verbose_name_plural = 'Liked Boulders'
+    def __str__(self):
+        return f"{self.user.username} likes {self.boulder.name}"
 
 # ---- Attempts ----
 
@@ -115,8 +117,10 @@ class Boulder(BaseClimb):
 class Ascent(models.Model):
     boulder = models.ForeignKey(Boulder, on_delete=models.PROTECT, related_name='ascents')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ascents')
-    date_time = models.DateTimeField(auto_now_add=True)
-    proposed_grade = models.IntegerField()
+    date_time = models.DateTimeField()
+    proposed_grade = models.IntegerField(null=True)
+    attempts = models.IntegerField()
+
     def __str__(self):
         return f"{self.user.username}'s ascent of {self.boulder.name}"
 

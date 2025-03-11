@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import Boulder, User, Board, Ascent, LedConfig
-from .serializers import BoulderSerializer, UserSerializer, UserRegistrationSerializer, BoardSerializer, LedConfigSerializer
+from .models import Boulder, User, Board, Ascent, LedConfig, LikedBoulder
+from .serializers import BoulderSerializer, UserSerializer, UserRegistrationSerializer, BoardSerializer, LedConfigSerializer, AscentSerializer, AscentCreateSerializer, LikedBoulderSerializer
 from rest_framework import generics, permissions, serializers, renderers, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -57,16 +57,86 @@ class BoulderList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return Boulder.objects.annotate(
+        board_id = self.kwargs.get('board_id')
+        queryset = Boulder.objects.annotate(
             ascentionist_count=Count('ascents__user', distinct=True)
         ).select_related('setter', 'first_ascentionist', 'board')
 
+        if board_id:
+            queryset = queryset.filter(board_id=board_id)
+
+        return queryset
+
     def perform_create(self, serializer):
-        serializer.save()
+        # Get board_id from URL
+        board_id = self.kwargs.get('board_id')
+        serializer.save(
+            setter=self.request.user,
+            board_id=board_id
+        )
 
 class BoulderDetail(generics.RetrieveUpdateAPIView):
     serializer_class = BoulderSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    queryset = Boulder.objects.all()
+
+class BoulderAscentListCreate(generics.ListCreateAPIView): 
+    serializer_class = AscentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AscentCreateSerializer
+        return AscentSerializer
+    
+    def get_queryset(self):
+        boulder_id = self.kwargs.get('boulder_id')
+        return Ascent.objects.filter(boulder_id=boulder_id)
+    
+    def perform_create(self, serializer):
+        boulder_id = self.kwargs.get('boulder_id')
+        date_time = self.request.data.get('date_time')
+        serializer.save(
+            user=self.request.user,
+            boulder_id=boulder_id,
+            date_time=date_time
+        )
+
+class BoulderLikeView(generics.CreateAPIView, generics.DestroyAPIView):
+    serializer_class = LikedBoulderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        boulder_id = self.kwargs.get('boulder_id')
+        return LikedBoulder.objects.filter(
+            boulder_id=boulder_id,
+            user=self.request.user
+        )
+    
+    def perform_create(self, serializer):
+        boulder_id = self.kwargs.get('boulder_id')
+        # Check if already liked to prevent duplicates
+        if not LikedBoulder.objects.filter(
+            boulder_id=boulder_id,
+            user=self.request.user
+        ).exists():
+            serializer.save(
+                user=self.request.user,
+                boulder_id=boulder_id
+            )
+    
+    def delete(self, request, *args, **kwargs):
+        boulder_id = self.kwargs.get('boulder_id')
+        like = LikedBoulder.objects.filter(
+            boulder_id=boulder_id,
+            user=self.request.user
+        ).first()
+        
+        if like:
+            like.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
 
 # ---- User Views ----
 class UserList(generics.ListCreateAPIView):
@@ -96,3 +166,4 @@ class UserRegistration(generics.CreateAPIView):
                 'access': str(refresh.access_token),
             }
         }, status=status.HTTP_201_CREATED)
+        

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Boulder, User, Board, Ascent, LedConfig
+from .models import Boulder, User, Board, Ascent, LedConfig, LikedBoulder
 
 
         
@@ -24,20 +24,41 @@ class BoulderSerializer(serializers.ModelSerializer):
     ascentionist_count = serializers.SerializerMethodField()
     setter = UserSerializer(read_only = True)
     first_ascentionist = UserSerializer(read_only=True)
+    board = serializers.PrimaryKeyRelatedField(read_only=True)
+
     def get_ascentionist_count(self, obj):
         return getattr(obj, 'ascentionist_count', 0)
     
     class Meta:
         model = Boulder
         fields = ['id', 'name', 'description', 'date_set', 'board', 'setter',
-                    'first_ascentionist', 'draft', 'rating', 'fa_grade', 'ascentionist_count']
+                    'first_ascentionist', 'draft', 'like_count', 'fa_grade', 'ascentionist_count', 'holds']
+        
+class LikedBoulderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LikedBoulder
+        fields = ['boulder', 'user']
+        read_only_fields = ['boulder', 'user']
+        
+class AscentSerializer(serializers.ModelSerializer):
+    boulder = BoulderSerializer()
+    user = UserSerializer()
+    class Meta:
+        model = Ascent
+        fields = ['boulder', 'user', 'date_time', 'proposed_grade']
+
+class AscentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ascent
+        fields = ['proposed_grade', 'attempts', 'date_time']  # Only fields the user should provide
+    
 
 class BoardSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     class Meta:
         model = Board
-        fields = ['name', 'id', 'description', 'owner', 'image', 'angle', 'city', 'latitude', 'longitude', 'led_quantity']
-
+        fields = ['name', 'id', 'description', 'owner', 'image', 'angle',
+                   'city', 'latitude', 'longitude', 'led_quantity']
 
 class LedConfigSerializer(serializers.ModelSerializer):
     class Meta:

@@ -20,10 +20,7 @@ const BoulderList = ({ boulders } : BoulderListProps) => {
                 data={boulders}
                 renderItem={({item}) => (
                     <BoulderListItem
-                        name={item.name}
-                        grade={item.fa_grade}
-                        rating={item.rating}
-                        ascentionist_count={item.ascentionist_count}
+                        boulder={item}
                     />
                  )}
             />

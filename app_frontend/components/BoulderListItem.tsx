@@ -1,18 +1,32 @@
+import { Boulder } from '@/types/models';
+import { router } from 'expo-router';
 import React from 'react';
 import { List } from 'react-native-paper';
 
 interface BoulderListItemProps {
-    name: string;
-    grade: number | null | undefined;  // matches consensus_grade from Boulder interface
-    rating: 1 | 2 | 3 | 4 | 5;
-    ascentionist_count: number;
+    boulder: Boulder;
 }
 
-const BoulderListItem = ({name, grade, rating, ascentionist_count} : BoulderListItemProps) => (
-    <List.Item
-    title={name}
-    description={` V${grade || 'project'} - ${rating} stars \n ${ascentionist_count} ascents `}
-    />
-);
+
+
+const BoulderListItem = ({boulder} : BoulderListItemProps) => {
+    const handlePress = () => {
+        router.push({
+            pathname: "/(app)/(tabs)/(boulders)/[id]" as const,
+            params: { 
+                id: boulder.id,
+                boulder: JSON.stringify(boulder)
+            }
+        });
+    };
+
+    return (
+        <List.Item
+        title={boulder.name}
+        description={`V${boulder.consensus_grade || 'project'} - ${boulder.like_count} likes \n ${boulder.ascentionist_count} ascents `}
+        onPress={handlePress}
+        />
+    )
+};
 
 export default BoulderListItem;

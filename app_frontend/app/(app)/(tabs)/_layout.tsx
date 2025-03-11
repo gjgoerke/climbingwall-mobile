@@ -19,7 +19,7 @@ export default function TabLayout() {
             }}
         >
             <Tabs.Screen
-                name="index"
+                name="(boulders)"
                 options={{
                     title: 'Boulders',
                     headerTitle: 'Boulders',
@@ -27,11 +27,21 @@ export default function TabLayout() {
                         <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24}/>
                     ),
                 }} 
-            />
+            /> 
             <Tabs.Screen
                 name="(boards)"
                 options={{
                 title: 'Boards',
+                headerShown: false,
+                tabBarIcon: ({ color, focused }) => (
+                    <Ionicons name={focused ? 'cube' : 'cube-outline'} color={color} size={24}/>
+                ),
+                }}
+            />
+            <Tabs.Screen
+                name="(board3d)"
+                options={{
+                title: 'Board3d',
                 headerShown: false,
                 tabBarIcon: ({ color, focused }) => (
                     <Ionicons name={focused ? 'cube' : 'cube-outline'} color={color} size={24}/>
@@ -46,7 +56,7 @@ export default function TabLayout() {
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} color={color} size={24}/>
                     ),
-                }}/>
+            }}/>
         </Tabs>
     );
 }
