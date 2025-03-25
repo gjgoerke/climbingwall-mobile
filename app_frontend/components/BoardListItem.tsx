@@ -11,9 +11,9 @@ interface BoardListItemProps {
 
 const BoardListItem = ({id, name, city, angle} : BoardListItemProps) => (
     <List.Item
-    title={name}
-    description={`${city} - ${angle}°`}
-    onPress={() => {router.navigate(`/${id}`)}}
+        title={name}
+        description={`${city} - ${angle}°`}
+        onPress={() => {router.navigate(`/${id}`)}}
     />
 );
 

@@ -17,9 +17,9 @@ export interface Boulder {
 }
 
 export interface User {
-    username: String;
-    email: String;
-    password: String;
+    username: string;
+    email: string;
+    password: string;
 }
 
 export interface Board {
@@ -43,4 +43,13 @@ export interface LedConfig {
         relative_y: number;
         radius: number;
     }[];
+}
+
+export interface Ascent {
+    id: number;
+    user: User;
+    boulder: number;
+    comment: string | null;
+    date_time: Date;
+    proposed_grade: number;
 }

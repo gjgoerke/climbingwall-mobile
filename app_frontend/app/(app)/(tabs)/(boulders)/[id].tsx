@@ -6,7 +6,6 @@ import { View, StyleSheet, LayoutChangeEvent } from "react-native";
 import { Appbar } from "react-native-paper";
 import { Text } from "react-native";
 
-import api from "@/services/api";
 import { holdTypeColor } from "./set_boulder";
 import { Boulder } from "@/types/models";
 import { imgCoordsToScreen } from "@/services/image_drawing";
@@ -28,7 +27,7 @@ interface HeaderProps {
     parsedBoulder: Boulder | null;
 }
 
-const HeaderContent = ({ parsedBoulder } : HeaderProps) => {
+export const HeaderContent = ({ parsedBoulder } : HeaderProps) => {
     return (
         <View style={styles.headerContent}>
             <Text style={{ fontSize: 20, color: 'black' }}>{parsedBoulder?.name || ''}</Text>
@@ -40,7 +39,7 @@ const HeaderContent = ({ parsedBoulder } : HeaderProps) => {
 };
 
 export default function BoulderDetail() {
-    const { boulder, id, refresh } = useLocalSearchParams();
+    const { boulder } = useLocalSearchParams();
     const [parsedBoulder, setParsedBoulder] = useState<Boulder|null>(null);
     const { selectedBoard, boardLedConfig } = useBoard();
     const skiaImage = useImage(selectedBoard?.image);
@@ -84,6 +83,15 @@ export default function BoulderDetail() {
         });
     }
 
+    const handleInfoPress = () => {
+        router.push({
+            pathname: "/(app)/(tabs)/(boulders)/boulder_info" as const,
+            params: { 
+                boulder: boulder
+            }
+        });
+    }
+
     return(
         <View style={{flex: 1}}>
             <Appbar.Header style={styles.header}>
@@ -92,6 +100,7 @@ export default function BoulderDetail() {
                 <View style={{ flexDirection: 'row' }}>
                     <Appbar.Action icon={'lightbulb-on-outline'}/>
                     <Appbar.Action icon={'check'} onPress={handleLogAscentPress}/>
+                    <Appbar.Action icon={'information-outline'} onPress={handleInfoPress}/>
                 </View>
             </Appbar.Header>
             <Canvas style={styles.canvas} onLayout={handleLayout}>

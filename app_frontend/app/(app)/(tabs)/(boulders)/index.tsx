@@ -26,7 +26,6 @@ export default function Index() {
     try {
       const response = await api.get(`/boards/${selectedBoard?.id}/boulders/`);
       setBoulderlist(response.data);
-      console.log('boulder list: ', response.data)
     } catch (error: any) {
       if(error.response && error.response.status === 401) {
         console.log('Unauthorized: User needs to login.');

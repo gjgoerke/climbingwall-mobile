@@ -120,6 +120,7 @@ class Ascent(models.Model):
     date_time = models.DateTimeField()
     proposed_grade = models.IntegerField(null=True)
     attempts = models.IntegerField()
+    comment = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username}'s ascent of {self.boulder.name}"

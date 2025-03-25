@@ -41,16 +41,17 @@ class LikedBoulderSerializer(serializers.ModelSerializer):
         read_only_fields = ['boulder', 'user']
         
 class AscentSerializer(serializers.ModelSerializer):
-    boulder = BoulderSerializer()
-    user = UserSerializer()
+    user = UserSerializer(read_only=True)
+    # Replace the boulder field with a PrimaryKeyRelatedField
+    boulder = serializers.PrimaryKeyRelatedField(read_only=True)
+    
     class Meta:
         model = Ascent
-        fields = ['boulder', 'user', 'date_time', 'proposed_grade']
-
+        fields = ['id', 'user', 'boulder', 'date_time', 'proposed_grade', 'comment']
 class AscentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ascent
-        fields = ['proposed_grade', 'attempts', 'date_time']  # Only fields the user should provide
+        fields = ['proposed_grade', 'attempts', 'date_time', 'comment']  # Only fields the user should provide
     
 
 class BoardSerializer(serializers.ModelSerializer):
