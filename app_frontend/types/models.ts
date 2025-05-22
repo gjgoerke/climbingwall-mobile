@@ -53,3 +53,12 @@ export interface Ascent {
     date_time: Date;
     proposed_grade: number;
 }
+
+export interface AscentWithBoulder {
+    id: number;
+    user: User;
+    boulder: Boulder;
+    comment: string | null;
+    date_time: Date;
+    proposed_grade: number;
+}

@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
                         // Refresh successful: set request header, and login
                         api.interceptors.request.use(async (config) => {
                             config.headers.set('Authorization', `Bearer ${newToken.access}`);
-                            console.log('api header set to: ',newToken.access);
+                            console.log('api header set to: ', newToken.access);
                             return config;
                         });
                         setauthState({
@@ -119,6 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode } ) => {
 
     const login = async (user: authUser) => {
         try {
+            console.log('login request')
             setIsLoading(true);
             const response = await api.post('/token/', {
                 ...(user.username ? { username: user.username } : { email: user.email }),

@@ -32,7 +32,8 @@ class BoulderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Boulder
         fields = ['id', 'name', 'description', 'date_set', 'board', 'setter',
-                    'first_ascentionist', 'draft', 'like_count', 'fa_grade', 'ascentionist_count', 'holds']
+                    'first_ascentionist', 'draft', 'like_count', 'fa_grade', 'ascentionist_count', 'holds',
+                    'consensus_grade']
         
 class LikedBoulderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,10 +45,18 @@ class AscentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     # Replace the boulder field with a PrimaryKeyRelatedField
     boulder = serializers.PrimaryKeyRelatedField(read_only=True)
-    
     class Meta:
         model = Ascent
         fields = ['id', 'user', 'boulder', 'date_time', 'proposed_grade', 'comment']
+
+class AscentWithBoulderSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    # Replace the boulder field with a PrimaryKeyRelatedField
+    boulder = BoulderSerializer()
+    class Meta:
+        model = Ascent
+        fields = ['id', 'user', 'boulder', 'date_time', 'proposed_grade', 'comment']
+
 class AscentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ascent

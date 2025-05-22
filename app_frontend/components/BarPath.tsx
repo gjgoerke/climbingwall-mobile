@@ -1,6 +1,5 @@
 import React from "react";
-import { Path } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
+import { Skia, Path } from "@shopify/react-native-skia";
 import { useDerivedValue, SharedValue } from "react-native-reanimated";
  
 interface BarPathProps {
@@ -20,7 +19,7 @@ const BarPath = ({x, y, barWidth, graphHeight, bottomMargin, progress}: BarPathP
                 x: x! - barWidth / 2,
                 y: graphHeight + bottomMargin,
                 width: barWidth,
-                height: (y * - 1 - bottomMargin) * progress.value,
+                height: (y * (- 1) - bottomMargin) * progress.value,
             },
             rx: 8,
             ry: 8

@@ -1,3 +1,4 @@
+import React from "react";
 import { Group, Line, Text, useFont } from "@shopify/react-native-skia";
 import { Roboto_400Regular } from '@expo-google-fonts/roboto';
 import * as d3 from 'd3';
@@ -23,27 +24,28 @@ const YAxis = ({height, canvasWidth, maxValue, topMargin, bottomMargin, steps = 
 
     return(
         <Group>
-            <Line
+            {/* <Line
                 p1={{x: paddingLeft, y: 0}}
                 p2={{x: paddingLeft, y: height}}
-                color='#666666'
-            />
+                color="#1F1F1F1F"
+            /> */}
             {
                 tickValues.filter((value) => (Number.isInteger(value))).map((value, index) => {
                     const y = (value / maxValue) * height + topMargin ;
                     
                     return (
                         <Group key={value}>
-                            <Line
-                                p1={{x: paddingLeft, y: y}}
-                                p2={{x: canvasWidth, y: y}}
-                            />
                             <Text
                                 font={font}
                                 text={(maxValue - value).toString()}
                                 x={5}
                                 y={y - 10}
                             />
+                            <Line
+                                    p1={{x: paddingLeft, y: y}}
+                                    p2={{x: canvasWidth, y: y}}
+                                    color="#1F1F1F3F"
+                            />      
                         </Group>
                     );
                 })

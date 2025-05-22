@@ -1,7 +1,11 @@
 from django.shortcuts import render
 from .models import Boulder, User, Board, Ascent, LedConfig, LikedBoulder
-from .serializers import BoulderSerializer, UserSerializer, UserRegistrationSerializer, BoardSerializer, LedConfigSerializer, AscentSerializer, AscentCreateSerializer, LikedBoulderSerializer
-from rest_framework import generics, permissions, serializers, renderers, status
+from .serializers import (
+    BoulderSerializer, UserSerializer, UserRegistrationSerializer,
+    BoardSerializer, LedConfigSerializer, AscentSerializer,
+    AscentCreateSerializer, AscentWithBoulderSerializer, LikedBoulderSerializer
+)
+from rest_framework import generics, permissions, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -143,6 +147,18 @@ class UserList(generics.ListCreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = User.objects.all()
+
+class MyAscentList(generics.ListAPIView):
+    serializer_class = AscentWithBoulderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Ascent.objects.filter(user=self.request.user)
+    
+class UserAscentList(generics.ListAPIView):
+    serializer_class = AscentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Ascent.objects.all()
 
 class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer

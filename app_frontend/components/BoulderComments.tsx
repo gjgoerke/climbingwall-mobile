@@ -1,9 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { FlashList } from "@shopify/flash-list";
 import { Divider, List } from 'react-native-paper';
 
-import { Board } from '@/types/models';
 import { Comment } from '@/app/(app)/(tabs)/(boulders)/boulder_info';
 
 const styles = StyleSheet.create({
@@ -17,27 +15,6 @@ const styles = StyleSheet.create({
 interface BoulderCommentsProps {
     comments: Comment[]
 }
-interface BoulderCommentProps {
-    comment: Comment
-}
-
-const BoulderComment = ({ comment } : BoulderCommentProps) => {
-    let gradeText = '';
-    if (comment.proposed_grade != null && comment.proposed_grade != undefined) {
-        gradeText = ` - V${comment.proposed_grade}`;
-    }
-    return (
-        <>
-            <List.Item
-                title={() => (
-                    <Text>{comment.user}{gradeText}</Text>
-                )}
-                description={() => (<Text>{comment.comment}</Text>)}
-            />
-        </>
-    )
-    
-};
 
 const BoulderComments = ({ comments } : BoulderCommentsProps) => {
     return (
@@ -53,9 +30,12 @@ const BoulderComments = ({ comments } : BoulderCommentsProps) => {
                             <Divider/>
                             <List.Item
                                 title={() => (
-                                    <Text>{comment.user}{gradeText}</Text>
+                                    <>
+                                        <Text style={{fontWeight: 500}}>{comment.user}{gradeText}</Text>
+                                        <Text style={{fontWeight: 300}}>{new Date(comment.date_time).toLocaleDateString()}</Text>
+                                    </>
                                 )}
-                                description={() => (<Text>{comment.comment}</Text>)}
+                                description={() => (<Text style={{fontWeight: 400}}>{comment.comment}</Text>)}
                             />
                             {index === comments.length - 1 && <Divider/>}
                         </View>
