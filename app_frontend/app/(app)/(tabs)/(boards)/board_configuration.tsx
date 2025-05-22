@@ -13,6 +13,7 @@ import api from "@/services/api";
 import AnimatedCircleGestureHandlers from "@/components/AnimatedGestureHandlers";
 import AnimatedHoldCircles from "@/components/AnimatedHoldCircles";
 import { screenCoordsToImg } from "@/services/image_drawing";
+import { highlightLed } from "@/services/lights";
 
 // x,y values are absolute screen coordiinates.
 export type Hold = {
@@ -166,16 +167,19 @@ export default function BoardConfiguration() {
         ? skiaImage.height() / skiaImage.width() 
         : height / width;
         setImageDimensions({ width, height: width * imgAspect });
-    } 
+    }
+
     // Buttons
     const leftOnPress = () => {
         if (selectedLed > 1) {
+            highlightLed(selectedLed - 1);
             setSelectedLed(selectedLed - 1);
         }
     }
 
     const rightOnPress = () => {
         if (selectedLed < ledCount) {
+            highlightLed(selectedLed + 1);
             setSelectedLed(selectedLed + 1);
         }
     }

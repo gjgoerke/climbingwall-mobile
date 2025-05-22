@@ -36,12 +36,8 @@ const styles = StyleSheet.create({
 
 
 export default function SetBoulderScreen() {
-    const theme = useTheme();
     const [boulderHolds, setBoulderHolds] = useState<BoulderHold[]>([]);
-    const { selectedBoard, boardLedConfig } = useBoard();
-    const nextIcon = Platform.OS === 'ios' 
-        ? () => <Ionicons name="chevron-forward" size={32} color={theme.colors.onSurface} />
-        : 'arrow-right';
+    const { boardLedConfig } = useBoard();
 
     const handleNextPress = () => {
         const boulderData = boulderHolds.filter((value) => (value.type !== 'UNSELECTED'))
@@ -64,9 +60,7 @@ export default function SetBoulderScreen() {
                 })));
             }
             
-            return () => {
-                // Optional cleanup
-            };
+            return () => {};
         }, [boardLedConfig])
     );
 

@@ -3,6 +3,7 @@ import type { SharedValue } from "react-native-reanimated";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { SetStateAction, Dispatch } from "react";
 import type { Hold } from "@/app/(app)/(tabs)/(boards)/board_configuration";
+import { highlightLed } from "@/services/lights";
 interface Props {
     hold: Hold;
     isActive: boolean;
@@ -45,7 +46,10 @@ export default function CircleGestureHandler ({
 
     // Gestures
     const singleTap = Gesture.Tap()
-        .onEnd(() => setSelectedLed(index + 1))
+        .onEnd(() => {
+            highlightLed(index + 1)
+            setSelectedLed(index + 1)
+        })
         .runOnJS(true);
 
     const doubleTap = Gesture.Tap()
