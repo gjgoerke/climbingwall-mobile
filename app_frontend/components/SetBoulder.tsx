@@ -136,10 +136,10 @@ export default function SetBoulder ({boulderHolds, setBoulderHolds, holdTypeColo
                                 cx={screenCoords.screen_x}
                                 cy={screenCoords.screen_y}
                                 r={screenCoords.screen_r || 20}
-                                color={'rgba(0,0,0,0)'}
-                            >
-                                <Paint color={holdTypeColor[hold.type]} style="stroke" strokeWidth={2} />
-                            </Circle>
+                                color={holdTypeColor[hold.type]}
+                                style="stroke"       // This makes it outline only
+                                strokeWidth={2}  
+                            />
                         );
                     })
                 }

@@ -10,12 +10,13 @@ interface HoldCircleProps {
 export default function HoldCircle({hold, isActive} : HoldCircleProps) {
 
     return (
-        <Circle 
+        <Circle
             cx={hold.x}
             cy={hold.y}
             r={hold.r}
-            color={'rgba(0,0,0,0)'}>
-            <Paint color={isActive ? '#c705f7' : "#adbce6"} style="stroke" strokeWidth={2} />
-        </Circle>
+            color={isActive ? '#c705f7' : "#adbce6"}
+            style="stroke"
+            strokeWidth={2}  
+        />
     );
 }

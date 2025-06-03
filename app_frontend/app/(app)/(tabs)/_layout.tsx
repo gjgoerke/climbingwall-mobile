@@ -39,16 +39,6 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="(board3d)"
-                options={{
-                title: 'Board3d',
-                headerShown: false,
-                tabBarIcon: ({ color, focused }) => (
-                    <Ionicons name={focused ? 'cube' : 'cube-outline'} color={color} size={24}/>
-                ),
-                }}
-            />
-            <Tabs.Screen
                 name="profile"
                 options={{
                     title: 'Profile',

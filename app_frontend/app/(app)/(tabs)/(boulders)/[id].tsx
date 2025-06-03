@@ -9,6 +9,7 @@ import { Text } from "react-native";
 import { holdTypeColor } from "./set_boulder";
 import { Boulder } from "@/types/models";
 import { imgCoordsToScreen } from "@/services/image_drawing";
+import { updateLights } from "@/services/lights";
 
 const styles = StyleSheet.create({
     canvas : {
@@ -92,13 +93,19 @@ export default function BoulderDetail() {
         });
     }
 
+    const handleLightsPress = () => {
+        if (parsedBoulder?.holds) {
+            updateLights(parsedBoulder.holds);
+        }
+    }
+
     return(
         <View style={{flex: 1}}>
             <Appbar.Header style={styles.header}>
                 <Appbar.Action icon={'arrow-left'} onPress={() => {router.back();}} />
                 <HeaderContent parsedBoulder={parsedBoulder}/>
                 <View style={{ flexDirection: 'row' }}>
-                    <Appbar.Action icon={'lightbulb-on-outline'}/>
+                    <Appbar.Action icon={'lightbulb-on-outline'} onPress={handleLightsPress}/>
                     <Appbar.Action icon={'check'} onPress={handleLogAscentPress}/>
                     <Appbar.Action icon={'information-outline'} onPress={handleInfoPress}/>
                 </View>
@@ -131,10 +138,10 @@ export default function BoulderDetail() {
                                 cx={screenCoords.screen_x}
                                 cy={screenCoords.screen_y}
                                 r={screenCoords.screen_r || 20}
-                                color={'rgba(0,0,0,0)'}
-                            >
-                                <Paint color={holdTypeColor[hold.type]} style="stroke" strokeWidth={2} />
-                            </Circle>
+                                color={holdTypeColor[hold.type]}
+                                style="stroke"       // This makes it outline only
+                                strokeWidth={2}  
+                            />
                         );
                     })
                 }

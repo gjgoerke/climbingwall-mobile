@@ -1,5 +1,5 @@
 import axios from 'axios';
-export const ESP_URL = 'http://10.0.0.250:8000';
+export const ESP_URL = 'http://10.0.0.250';
 
 import { BoulderHold } from '@/app/(app)/(tabs)/(boulders)/set_boulder';
 
@@ -30,6 +30,7 @@ export const updateLights = async (boulderHoldArray: BoulderHold[]) => {
 
     try {
         const response = await esp.post('/lights', { holds });
+        console.log('updateLights()')
         return response.data; // Return the response
     } catch (error) {
         console.error('Error updating lights:', error);
@@ -38,12 +39,12 @@ export const updateLights = async (boulderHoldArray: BoulderHold[]) => {
 }
 
 export const highlightLed = async (ledNumber: number) => {
+    console.log('highlightLed()')
     try {
         const response = await esp.post('/lights', { holds: [{index: ledNumber, type: 4}] });
         return response.data; // Return the response
     } catch (error) {
         console.error('Error updating lights:', error);
-        console.log(error)
         throw error; 
     }
 }
